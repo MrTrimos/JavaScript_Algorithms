@@ -13,7 +13,7 @@ function createTable(parent, cols, rows){
 		var tr = document.createElement('tr');
 
 		for(var j = 0; j < cols; j++){
-		
+		 
 			var td = document.createElement('td');
 			tr.appendChild(td);
 			
