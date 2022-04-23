@@ -1,7 +1,7 @@
 "use strict"
 
-let table_colon = 5;
-let table_stroc = 6;
+let table_colon = 14;
+let table_stroc = 7;
 
 // Table
 var elem = document.querySelector('#elem');
@@ -27,27 +27,22 @@ function createTable(parent, cols, rows){
 
 
 // Porametrs
-let strok1 = ["№ ітерації, k","xk","f(xk)","f'(xk)","|f'(xk)|","f''(xk)"];
-
-let Q = 0.001;
-
-let x = [0.05];
-let f = [];
-
-let f_one_hatch = [];
-let f_one_hatch_ABS = [];
-
-let f_two_hatch = [];
-
-let d = 1;
+let strok1 = ["№ ітерації, k","xk-1","f'(xk-1)","xk","f'(xk)","xk+1","f'(xk+1)"];
 
 let h = 0.001;
 
+let x = [0.05, 1.25];
+
+let Q = 0.001;
+
+let f = [];
+let f_one_hatch = [];
+
 Decision();
 createTable(elem, table_stroc, table_colon);
-Nuton();
+Nuton_Sicn();
 
-function Nuton(){
+function Nuton_Sicn(){
 	let tds = elem.querySelectorAll('td');
 
 		//strolk1
@@ -60,61 +55,59 @@ function Nuton(){
 			tds[i].innerHTML = j;
 		}
 
-		//x
+		//xk-1
 		for(let j = 0, i = table_stroc + 1; i < table_stroc * table_colon; i = i + table_stroc, j++){
+			tds[i].innerHTML = Math.ceil(x[j - 1] * 100) / 100;
+		}
+
+		//f'(xk-1)
+		for(let j = 0, i = table_stroc + 2; i < table_stroc * table_colon; i = i + table_stroc, j++){
+			tds[i].innerHTML = Math.ceil(f_one_hatch[j - 1] * 100) / 100;
+		}
+
+		//xk
+		for(let j = 0, i = table_stroc + 3; i < table_stroc * table_colon; i = i + table_stroc, j++){
 			tds[i].innerHTML = Math.ceil(x[j] * 100) / 100;
 		}
 
-		//f(x)
-		for(let j = 0, i = table_stroc + 2; i < table_stroc * table_colon; i = i + table_stroc, j++){
-			tds[i].innerHTML = Math.ceil(f[j] * 1000) / 1000;
-		}
-
-		//f'(x)
-		for(let j = 0, i = table_stroc + 3; i < table_stroc * table_colon; i = i + table_stroc, j++){
-			tds[i].innerHTML = Math.ceil(f_one_hatch[j] * 1000) / 1000;
-		}
-
-		//|f'(x)|
+		//f'(xk)
 		for(let j = 0, i = table_stroc + 4; i < table_stroc * table_colon; i = i + table_stroc, j++){
-			tds[i].innerHTML = Math.ceil(f_one_hatch_ABS[j] * 1000) / 1000;
+			tds[i].innerHTML = Math.ceil(f_one_hatch[j] * 100) / 100;
 		}
 
-		//f''(x)
+		//xk+1
 		for(let j = 0, i = table_stroc + 5; i < table_stroc * table_colon; i = i + table_stroc, j++){
-			tds[i].innerHTML = Math.ceil(f_two_hatch[j] * 1000) / 1000;
+			tds[i].innerHTML = Math.ceil(x[j + 1]  * 100) / 100;
+		}
+
+		//f'(xk+1)
+		for(let j = 0, i = table_stroc + 6; i < table_stroc * table_colon; i = i + table_stroc, j++){
+			tds[i].innerHTML = Math.ceil(f_one_hatch[j + 1] * 100) / 100;
 		}
 
 }
 
-
 function Decision(){
 	for(let i = 0; i < table_colon; i++){
-		// f[i] = 2 * Math.pow(x[i], 2) - 4 * x[i] + (16 / x[i]); // 1
-
-		// f_one_hatch[i] = 4 * x[i] - 4 - (16 / Math.pow(x[i], 2)); // 1
-		// f_two_hatch[i] = 4 + (32 / Math.pow(x[i], 3)); // 1
-		// f_one_hatch_ABS[i] = Math.abs(4 * x[i] - 4 - (16 / Math.pow(x[i], 2))); // 1
 
 		f[i] = Math.pow((x[i] - 1),2) * Math.pow((x[i] + 1), 4) * Math.pow((x[i] - 2), 3); // 2
 
 		f_one_hatch[i] = ( (Math.pow((x[i] + h - 1),2) * Math.pow((x[i]+ h + 1), 4) * Math.pow((x[i] + h - 2), 3)) 
 		- (Math.pow((x[i] - h - 1),2) * Math.pow((x[i] - h + 1), 4) * Math.pow((x[i] - h - 2), 3)) ) 
 		/ (2 * h);
+
+		f_one_hatch[i + 1] = ( (Math.pow((x[i + 1] + h - 1),2) * Math.pow((x[i + 1]+ h + 1), 4) * Math.pow((x[i + 1] + h - 2), 3)) 
+		- (Math.pow((x[i + 1] - h - 1),2) * Math.pow((x[i + 1] - h + 1), 4) * Math.pow((x[i + 1] - h - 2), 3)) ) 
+		/ (2 * h);
+
+		x[i + 2] = (f_one_hatch[i + 1] * x[i] - f_one_hatch[i] * x[i + 1]) / (f_one_hatch[i + 1] - f_one_hatch[i]);
 		
-		f_two_hatch[i] = ( (Math.pow((x[i] + h - 1),2) * Math.pow((x[i]+ h + 1), 4) * Math.pow((x[i] + h - 2), 3))
-		- 2 * (Math.pow((x[i] - 1),2) * Math.pow((x[i] + 1), 4) * Math.pow((x[i] - 2), 3))
-		+ (Math.pow((x[i] - h - 1),2) * Math.pow((x[i] - h + 1), 4) * Math.pow((x[i] - h - 2), 3))
-		) / (Math.pow(h, 2));
+		f_one_hatch[i + 2] = ( (Math.pow((x[i + 2] + h - 1),2) * Math.pow((x[i + 2]+ h + 1), 4) * Math.pow((x[i + 2] + h - 2), 3)) 
+		- (Math.pow((x[i + 2] - h - 1),2) * Math.pow((x[i + 2] - h + 1), 4) * Math.pow((x[i + 2] - h - 2), 3)) ) 
+		/ (2 * h);
 
-
-		f_one_hatch_ABS[i] = Math.abs( ( (Math.pow((x[i] + h - 1),2) * Math.pow((x[i]+ h + 1), 4) * Math.pow((x[i] + h - 2), 3))
-		- 2 * (Math.pow((x[i] - 1),2) * Math.pow((x[i] + 1), 4) * Math.pow((x[i] - 2), 3))
-		+ (Math.pow((x[i] - h - 1),2) * Math.pow((x[i] - h + 1), 4) * Math.pow((x[i] - h - 2), 3))
-		) / (Math.pow(h, 2)) );
-
-		if(f_one_hatch_ABS[i] <= Q){table_colon = i + 2; break;}
-
-		x[i + 1] = x[i] - (f_one_hatch[i] / f_two_hatch[i]);
+		if(Math.abs(f_one_hatch[i + 2]) < Q){alert(i);table_colon = i + 1; break;}
+		
+		if(f[i + 2] > 0){x[i + 1] = x[0];}
 	}
 }

@@ -29,11 +29,13 @@ function createTable(parent, cols, rows){
 // Porametrs
 let strok1 = ["№ ітерації, k","xk","L","f(xk)","f'(xk)","f''(xk)","x~","f(x~)","f'(x~)"];
 
-let x = [-1.6];
+let x = [0.05];
 
-let L = [];
+let L = [' ', 1];
 let Q = 0.01;
 let J = 0.5;
+
+let h = 0.001;
 
 let f = [];
 let f_one_hatch = [];
@@ -42,6 +44,11 @@ let f_two_hatch = [];
 let x_whith_line = [];
 let f_whith_line = [];
 let f_one_hatch_line = [];
+
+let FLineXHatch_FX = [];
+let J_FXPow2_FTwoHatch = [];
+
+let iteration = 0;
 
 Decision();
 createTable(elem, table_stroc, table_colon);
@@ -103,7 +110,64 @@ function Nuton_Rafson(){
 
 
 function Decision(){
-	for(let i = 0; i < table_colon; i++){
-		f[i] = x[i] * Math.atan() * x[i] - (1/2) * Math.In()
+
+	f[0] = Math.pow((x[0] - 1),2) * Math.pow((x[0] + 1), 4) * Math.pow((x[0] - 2), 3);
+
+	f_one_hatch[0] = ( (Math.pow((x[0] + h - 1),2) * Math.pow((x[0]+ h + 1), 4) * Math.pow((x[0] + h - 2), 3)) 
+		- (Math.pow((x[0] - h - 1),2) * Math.pow((x[0] - h + 1), 4) * Math.pow((x[0] - h - 2), 3)) ) 
+		/ (2 * h);
+
+	f_two_hatch[0] = ( (Math.pow((x[0] + h - 1),2) * Math.pow((x[0]+ h + 1), 4) * Math.pow((x[0] + h - 2), 3))
+		- 2 * (Math.pow((x[0] - 1),2) * Math.pow((x[0] + 1), 4) * Math.pow((x[0] - 2), 3))
+		+ (Math.pow((x[0] - h - 1),2) * Math.pow((x[0] - h + 1), 4) * Math.pow((x[0] - h - 2), 3))
+		) / (Math.pow(h, 2));
+
+	//if(Math.abs(f_one_hatch[0] < Q)){table_colon = i + 1 ; break;} 
+
+	for(let i = 1; i < table_colon; i++){
+
+		L[i] = 1;
+
+		if (i > 2){iteration = 1}
+
+		x_whith_line[i] = x[i - 1 - iteration] - (f_one_hatch[i - 1 - iteration] / f_two_hatch[i - 1 - iteration]);
+		f_one_hatch_line[i] = ( (Math.pow((x_whith_line[i - iteration] + h - 1),2) * Math.pow((x_whith_line[i - iteration]+ h + 1), 4) * Math.pow((x_whith_line[i - iteration] + h - 2), 3)) 
+		- (Math.pow((x_whith_line[i - iteration] - h - 1),2) * Math.pow((x_whith_line[i - iteration] - h + 1), 4) * Math.pow((x_whith_line[i - iteration] - h - 2), 3)) ) 
+		/ (2 * h);
+
+
+		if(Math.abs(f_one_hatch_line[i] > Q)){table_colon = i + 1 ; break;} 
+
+		
+
+		f_whith_line[i] = Math.pow((x_whith_line[i] - 1),2) * Math.pow((x_whith_line[i] + 1), 4) * Math.pow((x_whith_line[i] - 2), 3);
+		
+		FLineXHatch_FX[i] = f_whith_line[i] - f[i - 1];
+		J_FXPow2_FTwoHatch[i] = ( -J * Math.pow(f_one_hatch[i - 1], 2) ) / f_two_hatch[i - 1];
+
+		if(FLineXHatch_FX[i] > J_FXPow2_FTwoHatch[i]){L[i + 1] = L[i] / 2;}
+
+		x_whith_line[i + 1] = x[i - 1] - L[i] * (f_one_hatch[i - 1] / f_two_hatch[i - 1]);
+
+		f_one_hatch_line[i + 1] = ( (Math.pow((x_whith_line[i + 1] + h - 1),2) * Math.pow((x_whith_line[i + 1]+ h + 1), 4) * Math.pow((x_whith_line[i + 1] + h - 2), 3)) 
+		- (Math.pow((x_whith_line[i + 1] - h - 1),2) * Math.pow((x_whith_line[i + 1] - h + 1), 4) * Math.pow((x_whith_line[i + 1] - h - 2), 3)) ) 
+		/ (2 * h);
+
+		if(Math.abs(f_one_hatch_line[i + 1] > Q)){table_colon = i + 1 ; break;} 
+
+		f_whith_line[i + 1] = Math.pow((x_whith_line[i + 1] - 1),2) * Math.pow((x_whith_line[i + 1] + 1), 4) * Math.pow((x_whith_line[i + 1] - 2), 3);
+
+
+		FLineXHatch_FX[i + 1] = f_whith_line[i] - f[i - 1];
+		J_FXPow2_FTwoHatch[i + 1] = ( -J * Math.pow(f_one_hatch[i - 1], 2) ) / f_two_hatch[i - 1];
+
+		if(FLineXHatch_FX[i + 1] > J_FXPow2_FTwoHatch[i + 1]){x[i] = x_whith_line[i + 1];}
+
+		f_one_hatch[i] = f_one_hatch_line[i + 1];
+
+		if(Math.abs(f_one_hatch[i] > Q)){table_colon = i + 1 ; break;} 
+
+		f_two_hatch[i] = 1 / 1 + Math.pow(x[i], 2);
+		i = i + 1;
 	}
 }
